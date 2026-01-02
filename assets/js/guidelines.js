@@ -111,8 +111,9 @@
 
     // Count players not from region: players with no in-region representable option
     var notFromRegion = playerOptions.filter(function(po){ return !po.options.some(function(c){ return Config.isInRegion(c, region); }); });
-    if(notFromRegion.length > 1){
-      issues.push({ severity: "bad", message: "Roster has " + notFromRegion.length + " players not from " + region + " (max 1 allowed)." });
+    var maxImports = (Config.getMaxImportsForRegion ? Config.getMaxImportsForRegion(region) : 1);
+    if(maxImports != null && notFromRegion.length > maxImports){
+      issues.push({ severity: "bad", message: "Roster has " + notFromRegion.length + " players not from " + region + " (max " + maxImports + " allowed)." });
     }
 
     // Must have at least N players able to represent the same allowed country for this region
@@ -178,11 +179,12 @@
       var minPlayers = (t.minPlayers != null ? t.minPlayers : (t.region ? Config.getTeamMinPlayersForRegion(t.region) : 2));
       var allowed = t.allowedCountries || [];
 
-      // Region rule: max 1 player with no in-region option
+      // Region rule: limit players with no in-region representable option (imports)
       if(t.region){
         var notFromRegion = playerOptions.filter(function(po){ return !po.options.some(function(c){ return Config.isInRegion(c, t.region); }); });
-        if(notFromRegion.length > 1){
-          issues.push({ severity: "bad", message: "Roster has " + notFromRegion.length + " players not from " + t.region + " (max 1 allowed)." });
+        var maxImports = (t.maxImports != null ? t.maxImports : (Config.getMaxImportsForRegion ? Config.getMaxImportsForRegion(t.region) : 1));
+        if(maxImports != null && notFromRegion.length > maxImports){
+          issues.push({ severity: "bad", message: "Roster has " + notFromRegion.length + " players not from " + t.region + " (max " + maxImports + " allowed)." });
         }
       }
 

@@ -57,6 +57,16 @@
     return 2;
   }
 
+  // Configurable import limit per region (players with no in-region representable option)
+  // Default: 1 import allowed per region. Set to 0 to disallow, or null to allow unlimited.
+  var maxImportsByRegion = {};
+  function getMaxImportsForRegion(region){
+    if(region && Object.prototype.hasOwnProperty.call(maxImportsByRegion, region)){
+      return maxImportsByRegion[region];
+    }
+    return 1; // default behavior
+  }
+
   window.AppConfig = {
     regions: regions,
     restrictedCitizenshipNoPRExpansion: restrictedCitizenshipNoPRExpansion,
@@ -64,6 +74,8 @@
     isInRegion: isInRegion,
     teamRepresentationMinByRegion: teamRepresentationMinByRegion,
     getTeamMinPlayersForRegion: getTeamMinPlayersForRegion,
+    maxImportsByRegion: maxImportsByRegion,
+    getMaxImportsForRegion: getMaxImportsForRegion,
     // Allowed team-representable countries by region (ISO alpha-2)
     teamRepresentableCountriesByRegion: {
       "Southeast Asia": ["MM","KH","LA","SG","TL","BN","ID","MY","PH"],
