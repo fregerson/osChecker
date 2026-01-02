@@ -4,6 +4,8 @@ A minimal static site that provides a Roster Checker for the Open Series, using 
 
 **Disclaimer**: This should not replace the official rulebook, and should only be used as a reference.
 
+A copy of the live checker can be found in: https://fregerson.github.io/osChecker/
+
 ## Structure
 
 - `index.html` — Roster Checker UI
