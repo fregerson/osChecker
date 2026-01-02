@@ -6,35 +6,25 @@
 
     // Americas: North America + Central America + Caribbean + South America (incl. Brazil)
     Americas: [
-      // North America
-      "CA","US","MX",
-      // Central America
-      "BZ","CR","SV","GT","HN","NI","PA",
-      // Caribbean (sovereign states)
-      "AG","BS","BB","CU","DM","DO","GD","HT","JM","KN","LC","VC","TT",
-      // South America
-      "AR","BO","BR","CL","CO","EC","GY","PE","PY","SR","UY","VE"
+      "US","CA",
+      "MX","CO","EC","CR","GT","DO","PA","PR","VE","SV","HN","JM","NI","TT","HT","GY","BS","BZ","GF","BB","LC","VC","GD","AG","VI","VG","KN","TC","AW","KY","BM","MQ","GP","AI","CW","SX","MF","BQ","DM","AR","PE","CL","BO","UY","PY","SR",
+      "BR"
     ],
 
     // Europe: Western EU + Eastern EU + Central Asia + Türkiye
     Europe: [
-      // Western/Northern/Southern Europe (selection)
-      "AD","AL","AT","BA","BE","BG","BY","CH","CY","CZ","DE","DK","EE","ES","FI","FR","GB","GR","HR","HU","IE","IS","IT","LI","LT","LU","LV","MD","MC","ME","MK","MT","NL","NO","PL","PT","RO","RS","RU","SE","SI","SK","SM","UA","VA","TR", "AZ"
+      "UZ","KZ","KG","TM","TJ","MN","GE","AM","MD","LV","LT","EE","AL","ME","MK","XK","BA","HR","SI","HU","SK","RS","RO","CZ","GR","PL","BG","TR","AZ",
+        "AD","AT","BE","DK","FO","FI","FR","DE","GI","GG","IS","IE","IM","IT","JE","LI","LU","MT","MC","NL","NO","PT","SM","ES","SJ","SE","CH","GB","VA","AX"
     ],
 
     // MEA: Middle East + Africa
-    MEA: [
-      // Middle East
-      "AE","BH","IQ","IR","IL","JO","KW","LB","OM","PS","QA","SA","SY","YE",
-      // Africa
-      "DZ","AO","BJ","BW","BF","BI","CV","CM","CF","TD","KM","CG","CD","CI","DJ","EG","GQ","ER","SZ","ET","GA","GM","GH","GN","GW","KE","LS","LR","LY","MG","MW","ML","MR","MU","MA","MZ","NA","NE","NG","RW","ST","SN","SC","SL","SO","ZA","SS","SD","TZ","TG","TN","UG","ZM","ZW"
-    ],
+    MEA: ["SA","AE","EG","MA","DZ","TN","QA","LY","OM","LB","KW","BH","SY","JO","IQ"],
 
     // Pacific: South Asia + South Korea + Japan + Australia
     Pacific: [
       // South Asia
-      "AF","BD","BT","IN","MV","NP","PK","LK",
-      // East Asia + Oceania (as specified)
+      "AF","BD","BT","MV","NP","PK","LK",
+      // East Asia + Oceania
       "KR","JP","AU","NZ"
     ],
 
