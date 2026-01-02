@@ -1,5 +1,5 @@
 (function(){
-  var Config = window.AppConfig || { regions: {}, restrictedCitizenshipNoPRExpansion: [], disallowedRepresentCountries: [], getRegionOfCountry: function(){return null;}, isInRegion: function(){return false;} };
+  var Config = window.AppConfig || { regions: {}, restrictedCitizenshipNoPRExpansion: [], getRegionOfCountry: function(){return null;}, isInRegion: function(){return false;} };
 
   function isRestrictedCitizen(code){
     return Config.restrictedCitizenshipNoPRExpansion.indexOf(code) !== -1;
@@ -11,10 +11,9 @@
     var primary = nationalityCode || "";
     var secondary = secondaryNationalityCode || "";
     var pr = prCode || "";
-    var disallowed = Config.disallowedRepresentCountries || [];
     var restrictedSet = Config.restrictedCitizenshipNoPRExpansion || [];
 
-    function allowed(code){ return !!code && disallowed.indexOf(code) === -1; }
+    function allowed(code){ return !!code; }
 
     // If any nationality is restricted, only the restricted nationality is allowed; PR is ignored
     var restrictedPresent = [primary, secondary].filter(function(n){ return n && restrictedSet.indexOf(n) !== -1; });
@@ -42,11 +41,6 @@
     var pr = prCode || "";
     var secondary = secondaryNationalityCode || "";
 
-    // Disallow representing certain countries globally
-    var isNatDisallowed = Config.disallowedRepresentCountries.indexOf(nationalityCode) !== -1;
-    var isPrDisallowed = pr && (Config.disallowedRepresentCountries.indexOf(pr) !== -1);
-    var isSecondaryDisallowed = secondary && (Config.disallowedRepresentCountries.indexOf(secondary) !== -1);
-
     // Dual nationality handling: if any nationality is restricted, nationality-only with the restricted one
     var nationalities = [];
     nationalities.push(nationalityCode);
@@ -56,19 +50,12 @@
     if(restrictedPresent.length > 0){
       // Restricted citizens can only represent their restricted nationality; PR does not expand representation.
       var chosenRestricted = restrictedPresent[0];
-      var chosenRestrictedDisallowed = Config.disallowedRepresentCountries.indexOf(chosenRestricted) !== -1;
-      if(!chosenRestrictedDisallowed){
-        return { country: chosenRestricted, reason: "Restricted citizen; nationality-only (PR ignored)", eligible: true };
-      }
       return { country: null, reason: "Restricted citizen; nationality disallowed", eligible: false };
     }
 
     if(isRestrictedCitizen(nationalityCode)){
       // Restricted citizens are not allowed dual representation via PR at all.
-      // They can only represent their nationality, provided it's not globally disallowed.
-      if(!isNatDisallowed){
-        return { country: nationalityCode, reason: "Restricted citizen; PR not permitted (nationality only)", eligible: true };
-      }
+      // They can only represent their nationality.
       return { country: null, reason: "Restricted citizen; nationality disallowed and PR not permitted", eligible: false };
     }
 
@@ -77,9 +64,6 @@
     // Prefer PR when present and allowed; else choose a valid nationality (prefer primary, fall back to secondary).
     if(pr && !isPrDisallowed){
       return { country: pr, reason: "Has permanent residency; may represent PR country", eligible: true };
-    }
-    if(!isNatDisallowed){
-      return { country: nationalityCode, reason: "Represents nationality (PR absent or disallowed)", eligible: true };
     }
     if(secondary && !isSecondaryDisallowed){
       return { country: secondary, reason: "Represents second nationality (primary disallowed)", eligible: true };

@@ -2,10 +2,6 @@
   // Configure regions and rules here.
   // Regions: map region name -> array of ISO alpha-2 codes
   var regions = {
-    // Southeast Asia definition per requirements:
-    // Myanmar (MM), Cambodia (KH), Laos (LA), Singapore (SG), Timor-Leste (TL),
-    // Brunei (BN), Indonesia (ID), Malaysia (MY), Philippines (PH), plus Thailand (TH) and Vietnam (VN)
-    // Note: TH and VN are counted in-region but cannot be represented (see disallowedRepresentCountries below)
     "Southeast Asia": ["MM","KH","LA","SG","TL","BN","ID","MY","PH","TH","VN"],
 
     // Americas: North America + Central America + Caribbean + South America (incl. Brazil)
@@ -20,7 +16,7 @@
       "AR","BO","BR","CL","CO","EC","GY","PE","PY","SR","UY","VE"
     ],
 
-    // Europe: West + East + Türkiye
+    // Europe: Western EU + Eastern EU + Central Asia + Türkiye
     Europe: [
       // Western/Northern/Southern Europe (selection)
       "AD","AL","AT","BA","BE","BG","BY","CH","CY","CZ","DE","DK","EE","ES","FI","FR","GB","GR","HR","HU","IE","IS","IT","LI","LT","LU","LV","MD","MC","ME","MK","MT","NL","NO","PL","PT","RO","RS","RU","SE","SI","SK","SM","UA","VA","TR", "AZ"
@@ -49,12 +45,6 @@
   // Citizens of these countries cannot expand representation via PR outside this set
   var restrictedCitizenshipNoPRExpansion = ["CN","HK","MO","TW"]; // China, Hong Kong, Macao, Chinese Taipei
 
-  // Countries that are tagged to a region but disallowed for representation
-  var disallowedRepresentCountries = [
-    // Use teamRepresentableCountriesByRegion for region-specific representation rules.
-    // Keep this list empty unless you have global disallow rules.
-  ];
-
   // Optional: explicit map of country -> region (auto-built from regions but can override)
   var countryToRegion = {};
   Object.keys(regions).forEach(function(r){
@@ -80,7 +70,6 @@
   window.AppConfig = {
     regions: regions,
     restrictedCitizenshipNoPRExpansion: restrictedCitizenshipNoPRExpansion,
-    disallowedRepresentCountries: disallowedRepresentCountries,
     getRegionOfCountry: getRegionOfCountry,
     isInRegion: isInRegion,
     teamRepresentationMinByRegion: teamRepresentationMinByRegion,
@@ -89,7 +78,7 @@
     teamRepresentableCountriesByRegion: {
       "Southeast Asia": ["MM","KH","LA","SG","TL","BN","ID","MY","PH"],
       Pacific: ["JP","KR","PK","BD","NP","LK","MV","BT","AU","NZ"],
-      "Greater China": ["HK", "MO"],
+      "Greater China": ["HK","MO"],
       Americas: [
        "US","CA", "MX","CO","EC","CR","GT","DO","PA","PR","VE","SV","HN","JM","NI","TT","HT","GY","BS","BZ","GF","BB","LC","VC","GD","AG","VI","VG","KN","TC","AW","KY","BM","MQ","GP","AI","CW","SX","MF","BQ","DM","AR","PE","CL","BO","UY","PY","SR","BR"
       ],
@@ -115,6 +104,7 @@
       { id: 'br', name: 'Brazil', region: 'Americas', allowedCountries: ["BR"], minPlayers: 2 },
       { id: 'eeu', name: 'Eastern Europe & Central Asia', region: 'Europe', allowedCountries: ["UZ","KZ","KG","TM","TJ","MN","GE","AM","MD","LV","LT","EE","AL","ME","MK","XK","BA","HR","SI","HU","SK","RS","RO","CZ","GR","PL","BG","TR","AZ"], minPlayers: 2 },
       { id: 'weu', name: 'Western Europe', region: 'Europe', allowedCountries: ["AD","AT","BE","DK","FO","FI","FR","DE","GI","GG","IS","IE","IM","IT","JE","LI","LU","MT","MC","NL","NO","PT","SM","ES","SJ","SE","CH","GB","VA","AX"], minPlayers: 2 },
+      { id: 'hkmo', name: 'Hong Kong & Macao', region: 'Greater China', allowedCountries: ["HK", "MO"], minPlayers: 2 },
     ]
   };
 })();
