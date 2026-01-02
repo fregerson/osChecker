@@ -34,9 +34,14 @@
           if(!name || !code) return;
           map[code] = name;
         });
-        // Merge extras (only if missing)
+        // Merge extras
         var extras = window.EXTRA_COUNTRIES || [];
-        extras.forEach(function(x){ if(x && x.code && !map[x.code]){ map[x.code] = x.name || x.code; } });
+        extras.forEach(function(x){
+          if(!x || !x.code) return;
+          var name = x.name || x.code;
+          // Always apply extras to allow renames/overrides
+          map[x.code] = name;
+        });
 
         // Build final sorted list
         var finalList = Object.keys(map).map(function(code){ return { code: code, name: map[code] }; });

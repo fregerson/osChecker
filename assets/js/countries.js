@@ -29,6 +29,10 @@
     { code: 'LC', name: 'Saint Lucia' },
     { code: 'VC', name: 'Saint Vincent and the Grenadines' },
     { code: 'GD', name: 'Grenada' },
-    { code: 'AG', name: 'Antigua and Barbuda' }
+    { code: 'AG', name: 'Antigua and Barbuda' },
+    { code: 'CN', name: 'Mainland China' },
+    { code: 'HK', name: 'Hong Kong, China' },
+    { code: 'MO', name: 'Macau, China' },
+    { code: 'TW', name: 'Chinese Taipei' }
   ];
 })();
