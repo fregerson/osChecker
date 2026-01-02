@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eligibility Checker</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Eligibility Checker</h1>
+      <p class="sub">
+        Select your Nationality and Permanent Residency (if any).
+        Note that you would need to have the Permanent Residency for at least 1 year prior to the event.
+      </p>
+
+      <h2 style="margin-top:24px">Roster Checker</h2>
+      <p class="small">
+        You should have 5–7 players. 
+        We’ll automatically check all regions and show which ones your team can represent.
+        Note that the information is only for reference, and you should still refer to the official rules.
+    </p>
+      <form id="rosterForm" class="card">
+        <div id="rosterPlayers"></div>
+
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <button type="button" id="addPlayerBtn" class="btn" aria-label="Add player">Add Player</button>
+          <button type="button" id="removePlayerBtn" class="btn" aria-label="Remove player">Remove Player</button>
+          <button type="submit" class="btn">Check Roster</button>
+        </div>
+      </form>
+
+      <section id="rosterResult" class="result" aria-live="polite"></section>
+    </main>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/countries.js"></script>
+    <script src="assets/js/guidelines.js"></script>
+    <script src="assets/js/script.js"></script>
+  </body>
+</html>
