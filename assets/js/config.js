@@ -92,7 +92,6 @@
     },
     // Tournaments: each defines allowed representable countries and optional region rule
     tournaments: [
-      // Examples — replace with your actual events
       { id: 'jp', name: 'Japan', region: 'Pacific', allowedCountries: ["JP"], minPlayers: 2 },
       { id: 'kr', name: 'South Korea', region: 'Pacific', allowedCountries: ["KR"], minPlayers: 2 },
       { id: 'sa', name: 'South Asia', region: 'Pacific', allowedCountries: ["PK","BD","NP","LK","MV","BT","AU","NZ"], minPlayers: 2 },

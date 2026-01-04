@@ -130,6 +130,16 @@
     });
     var eligibleTeamCountries = Object.keys(counts).filter(function(c){ return counts[c] >= minForTeamCountry; });
 
+    // Strict majority rule: if a single country has > half of players able to represent it,
+    // the team can only represent that country.
+    var majorityThreshold = Math.floor(players.length / 2) + 1; // strict majority
+    var majorityCountries = Object.keys(counts).filter(function(c){ return counts[c] >= majorityThreshold; });
+    if(majorityCountries.length > 0){
+      // Constrain representation to the majority country
+      eligibleTeamCountries = majorityCountries.slice(0,1);
+      issues.push({ severity: "ok", message: "Strict majority detected (" + counts[eligibleTeamCountries[0]] + "/" + players.length + ") — team must represent " + eligibleTeamCountries[0] + "." });
+    }
+
     if(eligibleTeamCountries.length === 0){
       var baseMsg = "Team cannot represent a country in " + region + ": requires at least " + minForTeamCountry + " players from the same country.";
       issues.push({ severity: "bad", message: baseMsg });
@@ -200,6 +210,14 @@
       });
 
       var eligibleTeamCountries = Object.keys(counts).filter(function(c){ return counts[c] >= minPlayers; });
+
+      // Strict majority rule within tournament context
+      var majorityThreshold = Math.floor(players.length / 2) + 1;
+      var majorityCountries = Object.keys(counts).filter(function(c){ return counts[c] >= majorityThreshold; });
+      if(majorityCountries.length > 0){
+        eligibleTeamCountries = majorityCountries.slice(0,1);
+        issues.push({ severity: "ok", message: "Strict majority detected (" + counts[eligibleTeamCountries[0]] + "/" + players.length + ") — team must represent " + eligibleTeamCountries[0] + " for this tournament." });
+      }
       if(eligibleTeamCountries.length === 0){
         issues.push({ severity: "bad", message: "Team cannot enter " + t.name + ": requires at least " + minPlayers + " players able to represent the same allowed country." });
       } else {
