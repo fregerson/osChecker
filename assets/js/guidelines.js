@@ -5,6 +5,11 @@
     return Config.restrictedCitizenshipNoPRExpansion.indexOf(code) !== -1;
   }
 
+  function isDisallowedCountry(code){
+    var disallowed = Config.disallowedParticipationCountries || [];
+    return !!code && disallowed.indexOf(code) !== -1;
+  }
+
   // Return all countries a player may represent given nationality/secondary/PR and restrictions
   function getRepresentableOptions(nationalityCode, prCode, secondaryNationalityCode){
     var options = [];
@@ -13,7 +18,7 @@
     var pr = prCode || "";
     var restrictedSet = Config.restrictedCitizenshipNoPRExpansion || [];
 
-    function allowed(code){ return !!code; }
+    function allowed(code){ return !!code && !isDisallowedCountry(code); }
 
     // If any nationality is restricted, only the restricted nationality is allowed; PR is ignored
     var restrictedPresent = [primary, secondary].filter(function(n){ return n && restrictedSet.indexOf(n) !== -1; });
@@ -30,7 +35,7 @@
 
     // Deduplicate preserving order
     var seen = {};
-    return options.filter(function(c){ if(seen[c]) return false; seen[c] = true; return true; });
+    return options.filter(function(c){ if(seen[c]) return false; seen[c] = true; return !isDisallowedCountry(c); });
   }
 
   // Team checks should be based on representable country (not PR vs nationality selection separately)
@@ -116,28 +121,53 @@
       issues.push({ severity: "bad", message: "Roster has " + notFromRegion.length + " players not from " + region + " (max " + maxImports + " allowed)." });
     }
 
-    // Must have at least N players able to represent the same allowed country for this region
+    // Build counts across all in-region representable countries (before whitelist)
+    var countsAllRegion = {};
+    playerOptions.forEach(function(po){
+      var seenAll = {};
+      po.options.forEach(function(c){
+        if(!Config.isInRegion(c, region)) return;
+        if(seenAll[c]) return; seenAll[c] = true;
+        countsAllRegion[c] = (countsAllRegion[c] || 0) + 1;
+      });
+    });
+
+    // Apply whitelist counts (allowed countries for this region)
     var counts = {};
     var whitelist = (Config.teamRepresentableCountriesByRegion && Config.teamRepresentableCountriesByRegion[region]) || null;
     playerOptions.forEach(function(po){
       var seen = {};
       po.options.forEach(function(c){
-        if(whitelist && whitelist.indexOf(c) === -1) return;
+        if(isDisallowedCountry(c)) return; // skip banned participation countries
         if(!Config.isInRegion(c, region)) return; // only count countries belonging to this region
+        if(whitelist && whitelist.indexOf(c) === -1) return; // apply region whitelist
         if(seen[c]) return; seen[c] = true; // count each player once per country
         counts[c] = (counts[c] || 0) + 1;
       });
     });
-    var eligibleTeamCountries = Object.keys(counts).filter(function(c){ return counts[c] >= minForTeamCountry; });
 
-    // Strict majority rule: if a single country has > half of players able to represent it,
-    // the team can only represent that country.
-    var majorityThreshold = Math.floor(players.length / 2) + 1; // strict majority
-    var majorityCountries = Object.keys(counts).filter(function(c){ return counts[c] >= majorityThreshold; });
-    if(majorityCountries.length > 0){
-      // Constrain representation to the majority country
-      eligibleTeamCountries = majorityCountries.slice(0,1);
-      issues.push({ severity: "ok", message: "Strict majority detected (" + counts[eligibleTeamCountries[0]] + "/" + players.length + ") — team must represent " + eligibleTeamCountries[0] + "." });
+    // Determine non-strict majority across all in-region countries (ignore whitelist)
+    var maxCount = 0;
+    Object.keys(countsAllRegion).forEach(function(c){ if(countsAllRegion[c] > maxCount) maxCount = countsAllRegion[c]; });
+    var topCountriesAllRegion = Object.keys(countsAllRegion).filter(function(c){ return countsAllRegion[c] === maxCount && maxCount > 0; });
+
+    // Eligible countries must meet minimum and then be constrained by the global majority set
+    var eligibleTeamCountries = Object.keys(counts).filter(function(c){ return counts[c] >= minForTeamCountry; });
+    if(topCountriesAllRegion.length > 0){
+      var topSet = {};
+      topCountriesAllRegion.forEach(function(c){ topSet[c] = true; });
+      var intersect = eligibleTeamCountries.filter(function(c){ return !!topSet[c]; });
+      if(intersect.length > 0){
+        eligibleTeamCountries = intersect;
+        if(topCountriesAllRegion.length === 1){
+          issues.push({ severity: "ok", message: "Top country detected (non-strict majority): " + topCountriesAllRegion[0] + " (" + maxCount + "/" + players.length + ") — team must represent this country if allowed." });
+        } else {
+          issues.push({ severity: "ok", message: "Top countries tied (non-strict majority): " + topCountriesAllRegion.join(', ') + " (" + maxCount + "/" + players.length + ") — team may represent one of these if allowed." });
+        }
+      } else {
+        // No allowed countries match the majority set
+        issues.push({ severity: "bad", message: "Majority set not allowed for representation in this region." });
+      }
     }
 
     if(eligibleTeamCountries.length === 0){
@@ -198,10 +228,25 @@
         }
       }
 
+      // Global majority before whitelist (allowedCountries): compute counts across all in-region countries
+      var countsAllRegion = {};
+      playerOptions.forEach(function(po){
+        var seenAll = {};
+        po.options.forEach(function(c){
+          if(t.region && !Config.isInRegion(c, t.region)) return;
+          if(seenAll[c]) return; seenAll[c] = true;
+          countsAllRegion[c] = (countsAllRegion[c]||0)+1;
+        });
+      });
+      var maxCount = 0;
+      Object.keys(countsAllRegion).forEach(function(c){ if(countsAllRegion[c] > maxCount) maxCount = countsAllRegion[c]; });
+      var topCountriesAllRegion = Object.keys(countsAllRegion).filter(function(c){ return countsAllRegion[c] === maxCount && maxCount > 0; });
+
       // Count per allowed country (optionally require country belonging to region if provided)
       playerOptions.forEach(function(po){
         var seen = {};
         po.options.forEach(function(c){
+          if(isDisallowedCountry(c)) return; // skip banned participation countries
           if(allowed.indexOf(c) === -1) return;
           if(t.region && !Config.isInRegion(c, t.region)) return;
           if(seen[c]) return; seen[c] = true;
@@ -210,13 +255,21 @@
       });
 
       var eligibleTeamCountries = Object.keys(counts).filter(function(c){ return counts[c] >= minPlayers; });
-
-      // Strict majority rule within tournament context
-      var majorityThreshold = Math.floor(players.length / 2) + 1;
-      var majorityCountries = Object.keys(counts).filter(function(c){ return counts[c] >= majorityThreshold; });
-      if(majorityCountries.length > 0){
-        eligibleTeamCountries = majorityCountries.slice(0,1);
-        issues.push({ severity: "ok", message: "Strict majority detected (" + counts[eligibleTeamCountries[0]] + "/" + players.length + ") — team must represent " + eligibleTeamCountries[0] + " for this tournament." });
+      // Enforce non-strict global majority before whitelist
+      if(topCountriesAllRegion.length > 0){
+        var topSet = {};
+        topCountriesAllRegion.forEach(function(c){ topSet[c] = true; });
+        var intersect = eligibleTeamCountries.filter(function(c){ return !!topSet[c]; });
+        if(intersect.length > 0){
+          eligibleTeamCountries = intersect;
+          if(topCountriesAllRegion.length === 1){
+            issues.push({ severity: "ok", message: "Top country detected (non-strict majority): " + topCountriesAllRegion[0] + " (" + maxCount + "/" + players.length + ") — team must represent this country if allowed." });
+          } else {
+            issues.push({ severity: "ok", message: "Top countries tied (non-strict majority): " + topCountriesAllRegion.join(', ') + " (" + maxCount + "/" + players.length + ") — team may represent one of these if allowed." });
+          }
+        } else {
+          issues.push({ severity: "bad", message: "Majority set not allowed for this tournament." });
+        }
       }
       if(eligibleTeamCountries.length === 0){
         issues.push({ severity: "bad", message: "Team cannot enter " + t.name + ": requires at least " + minPlayers + " players able to represent the same allowed country." });

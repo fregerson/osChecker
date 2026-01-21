@@ -128,7 +128,7 @@
     } else {
       var eligible = tourneyResults.filter(function(e){ return !!e.ok; });
       if(eligible.length === 0){
-        var none = document.createElement('div'); none.className = 'alert alert-warn'; none.textContent = 'No eligible tournaments for this roster.'; rosterResult.appendChild(none);
+        var none = document.createElement('div'); none.className = 'alert alert-warn'; none.textContent = 'No eligible tournaments for this roster. Please check with staff.'; rosterResult.appendChild(none);
         return;
       }
       eligible.forEach(function(entry){

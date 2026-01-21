@@ -35,6 +35,10 @@
   // Citizens of these countries cannot expand representation via PR outside this set
   var restrictedCitizenshipNoPRExpansion = ["CN","HK","MO","TW"]; // China, Hong Kong, Macao, Chinese Taipei
 
+  // Countries disallowed from participation entirely (ISO alpha-2)
+  // Any representation option resolving to one of these codes will be rejected.
+  var disallowedParticipationCountries = ["UA", "IR", "KP", "CU"];
+
   // Optional: explicit map of country -> region (auto-built from regions but can override)
   var countryToRegion = {};
   Object.keys(regions).forEach(function(r){
@@ -70,6 +74,7 @@
   window.AppConfig = {
     regions: regions,
     restrictedCitizenshipNoPRExpansion: restrictedCitizenshipNoPRExpansion,
+    disallowedParticipationCountries: disallowedParticipationCountries,
     getRegionOfCountry: getRegionOfCountry,
     isInRegion: isInRegion,
     teamRepresentationMinByRegion: teamRepresentationMinByRegion,
