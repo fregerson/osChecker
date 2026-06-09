@@ -39,7 +39,7 @@
 
   // Countries disallowed from participation entirely (ISO alpha-2)
   // Any representation option resolving to one of these codes will be rejected.
-  var disallowedParticipationCountries = [];
+  var disallowedParticipationCountries = ["IR", "UA", "KP", "CU"];
 
   // Optional: explicit map of country -> region (auto-built from regions but can override)
   var countryToRegion = {};
