@@ -14,7 +14,7 @@
     // Europe: Western EU + Eastern EU + Central Asia + Türkiye
     Europe: [
       "UZ","KZ","KG","TM","TJ","MN","GE","AM","MD","LV","LT","EE","AL","ME","MK","XK","BA","HR","SI","HU","SK","RS","RO","CZ","GR","PL","BG","TR","AZ",
-        "AD","AT","BE","DK","FO","FI","FR","DE","GI","GG","IS","IE","IM","IT","JE","LI","LU","MT","MC","NL","NO","PT","SM","ES","SJ","SE","CH","GB","VA","AX"
+      "AD","AT","BE","DK","FO","FI","FR","DE","GI","GG","IS","IE","IM","IT","JE","LI","LU","MT","MC","NL","NO","PT","SM","ES","SJ","SE","CH","GB","VA","AX"
     ],
 
     // MEA: Middle East + Africa
@@ -25,7 +25,9 @@
       // South Asia
       "AF","BD","BT","MV","NP","PK","LK",
       // East Asia + Oceania
-      "KR","JP","AU","NZ"
+      "KR","JP","AU","NZ",
+      // India
+      "IN",
     ],
 
     // Greater China
@@ -84,7 +86,7 @@
     // Allowed team-representable countries by region (ISO alpha-2)
     teamRepresentableCountriesByRegion: {
       "Southeast Asia": ["MM","KH","LA","SG","TL","BN","ID","MY","PH"],
-      Pacific: ["JP","KR","PK","BD","NP","LK","MV","BT","AU","NZ"],
+      Pacific: ["JP","KR","PK","BD","NP","LK","MV","BT","AU","NZ","IN"],
       "Greater China": ["HK","MO"],
       Americas: [
        "US","CA", "MX","CO","EC","CR","GT","DO","PA","PR","VE","SV","HN","JM","NI","TT","HT","GY","BS","BZ","GF","BB","LC","VC","GD","AG","VI","VG","KN","TC","AW","KY","BM","MQ","GP","AI","CW","SX","MF","BQ","DM","AR","PE","CL","BO","UY","PY","SR","BR"
@@ -100,10 +102,12 @@
       { id: 'jp', name: 'Japan', region: 'Pacific', allowedCountries: ["JP"], minPlayers: 2 },
       { id: 'kr', name: 'South Korea', region: 'Pacific', allowedCountries: ["KR"], minPlayers: 2 },
       { id: 'sa', name: 'South Asia', region: 'Pacific', allowedCountries: ["PK","BD","NP","LK","MV","BT","AU","NZ"], minPlayers: 2 },
+      { id: 'in', name: 'India', region: 'Pacific', allowedCountries: ["IN"], minPlayers: 3 },
       { id: 'sea-id', name: 'SEA Indonesia', region: 'Southeast Asia', allowedCountries: ["ID"], minPlayers: 3 },
       { id: 'sea-my', name: 'SEA Malaysia', region: 'Southeast Asia', allowedCountries: ["MY"], minPlayers: 3 },
       { id: 'sea-ph', name: 'SEA Philippines', region: 'Southeast Asia', allowedCountries: ["PH"], minPlayers: 3 },
       { id: 'sea-ph', name: 'SEA Wildcard', region: 'Southeast Asia', allowedCountries: ["MM","KH","LA","SG","TL","BN"], minPlayers: 3 },
+      { id: 'mea', name: 'Middle East & Africa', region: 'MEA', allowedCountries: ["SA","AE","EG","MA","DZ","TN","QA","LY","OM","LB","KW","BH","SY","JO","IQ"], minPlayers: 2 },
       { id: 'na', name: 'North America', region: 'Americas', allowedCountries: ["US","CA"], minPlayers: 2 },
       { id: 'lan', name: 'North LATAM', region: 'Americas', allowedCountries: ["MX","CO","EC","CR","GT","DO","PA","PR","VE","SV","HN","JM"], minPlayers: 2 },
       { id: 'las', name: 'South LATAM', region: 'Americas', allowedCountries: ["NI","TT","HT","GY","BS","BZ","GF","BB","LC","VC","GD","AG","VI","VG","KN","TC","AW","KY","BM","MQ","GP","AI","CW","SX","MF","BQ","DM","AR","PE","CL","BO","UY","PY","SR"], minPlayers: 2 },
