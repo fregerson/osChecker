@@ -41,9 +41,11 @@ python -m http.server 5500
 ```
 Then open http://localhost:5500/
 
+Directly opening `index.html` from disk may block `fetch('assets/data.json')` in the browser, so use a local server for testing.
+
 ## Notes
-- Country lists are fetched from https://restcountries.com; ensure the site can reach that endpoint.
-- If you prefer fully offline data, swap `script.js` to use a baked-in country array instead of fetching.
+- Country lists are loaded from `assets/data.json`.
+- If you update the bundled country data, keep the `name` and `alpha-2` fields intact so the roster dropdowns continue to work.
 
 ## Roster Checker
 - Add 5–7 players, then Check Roster.

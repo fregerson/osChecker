@@ -23,14 +23,14 @@
   }
 
   function loadCountries(){
-    fetch('https://restcountries.com/v3.1/all?fields=name,cca2')
+    fetch('assets/data.json') // Loaded from an online source.
       .then(function(r){ return r.json(); })
       .then(function(list){
         // Build map code -> name
         var map = {};
         list.forEach(function(c){
-          var name = c && c.name && c.name.common ? c.name.common : '';
-          var code = c && c.cca2 ? c.cca2 : '';
+          var name = c && c.name ? c.name : '';
+          var code = c && (c['alpha-2'] || c.cca2 || c.code) ? (c['alpha-2'] || c.cca2 || c.code) : '';
           if(!name || !code) return;
           map[code] = name;
         });
