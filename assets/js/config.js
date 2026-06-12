@@ -52,9 +52,10 @@
   function isInRegion(code, region){ return !!code && countryToRegion[code] === region; }
 
   // Minimum players required for the team to be considered representing a country per region
-  // Default is 2; Southeast Asia requires 3.
+  // Default is 2; Southeast Asia & India requires 3.
   var teamRepresentationMinByRegion = {
-    "Southeast Asia": 3
+    "Southeast Asia": 3,
+    "India": 3
   };
   function getTeamMinPlayersForRegion(region){
     if(region && Object.prototype.hasOwnProperty.call(teamRepresentationMinByRegion, region)){

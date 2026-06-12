@@ -62,6 +62,7 @@ Set per-region minimums in [assets/js/config.js](assets/js/config.js):
 ```
 teamRepresentationMinByRegion: {
 	"Southeast Asia": 3,
+	"India": 3,
 	// OtherRegion: 2
 }
 ```
