@@ -38,6 +38,18 @@
     return options.filter(function(c){ if(seen[c]) return false; seen[c] = true; return !isDisallowedCountry(c); });
   }
 
+  function getDisallowedSelectionCodes(player){
+    var codes = [];
+    var seen = {};
+    if(!player) return codes;
+    [player.nationality, player.secondaryNationality, player.pr].forEach(function(code){
+      if(!isDisallowedCountry(code) || seen[code]) return;
+      seen[code] = true;
+      codes.push(code);
+    });
+    return codes;
+  }
+
   // Team checks should be based on representable country (not PR vs nationality selection separately)
 
   // Determine the final representable country for a player based on nationality, PR, and rules
@@ -55,22 +67,26 @@
     if(restrictedPresent.length > 0){
       // Restricted citizens can only represent their restricted nationality; PR does not expand representation.
       var chosenRestricted = restrictedPresent[0];
-      return { country: null, reason: "Restricted citizen; nationality disallowed", eligible: false };
+      return { country: chosenRestricted, reason: "Restricted citizen; only the restricted nationality is representable", eligible: true };
     }
 
     if(isRestrictedCitizen(nationalityCode)){
       // Restricted citizens are not allowed dual representation via PR at all.
       // They can only represent their nationality.
-      return { country: null, reason: "Restricted citizen; nationality disallowed and PR not permitted", eligible: false };
+      return { country: nationalityCode, reason: "Restricted citizen; only the nationality is representable", eligible: true };
     }
 
     // Non-restricted citizens
     // Non-restricted citizens: nationality (primary or secondary) is fine; PR can override if allowed.
     // Prefer PR when present and allowed; else choose a valid nationality (prefer primary, fall back to secondary).
-    if(pr && !isPrDisallowed){
+    function allowed(code){ return !!code && !isDisallowedCountry(code); }
+    if(allowed(pr)){
       return { country: pr, reason: "Has permanent residency; may represent PR country", eligible: true };
     }
-    if(secondary && !isSecondaryDisallowed){
+    if(allowed(nationalityCode)){
+      return { country: nationalityCode, reason: "Represents nationality", eligible: true };
+    }
+    if(allowed(secondary)){
       return { country: secondary, reason: "Represents second nationality (primary disallowed)", eligible: true };
     }
     return { country: null, reason: "Nationality disallowed for representation and PR not usable", eligible: false };
@@ -208,16 +224,80 @@
   function evaluateRosterForTournaments(players){
     var tourneys = (Config.tournaments || []);
     var results = [];
+
     // Precompute player representable options once
     var playerOptions = players.map(function(p, idx){
       return { index: idx, options: getRepresentableOptions(p.nationality || "", p.pr || "", p.secondaryNationality || "") };
     });
+
+    var playerDisallowedIssues = [];
+    players.forEach(function(player, idx){
+      var disallowedCodes = getDisallowedSelectionCodes(player);
+      if(disallowedCodes.length > 0){
+        playerDisallowedIssues.push({
+          playerIndex: idx,
+          codes: disallowedCodes,
+          message: "Player " + (idx + 1) + " is from a country that may not be allowed for participation: " + disallowedCodes.join(', ') + ". Please check with staff on official eligibility."
+        });
+      }
+    });
+
+    // Determine the roster's top representable countries before looking at tournaments.
+    // We use the most supported country/countries across all player options as the roster's
+    // candidate representation set.
+    var countsAllCountries = {};
+    playerOptions.forEach(function(po){
+      var seenAll = {};
+      po.options.forEach(function(c){
+        if(seenAll[c]) return; seenAll[c] = true;
+        countsAllCountries[c] = (countsAllCountries[c] || 0) + 1;
+      });
+    });
+    var maxAllCount = 0;
+    Object.keys(countsAllCountries).forEach(function(c){ if(countsAllCountries[c] > maxAllCount) maxAllCount = countsAllCountries[c]; });
+    var topCountriesAll = Object.keys(countsAllCountries).filter(function(c){ return countsAllCountries[c] === maxAllCount && maxAllCount > 0; });
+
+    // Determine majority region across all representable country support.
+    var regionSupportCounts = {};
+    Object.keys(countsAllCountries).forEach(function(c){
+      var r = Config.getRegionOfCountry ? Config.getRegionOfCountry(c) : null;
+      if(!r) return;
+      regionSupportCounts[r] = (regionSupportCounts[r] || 0) + countsAllCountries[c];
+    });
+    var maxRegionSupport = 0;
+    Object.keys(regionSupportCounts).forEach(function(r){ if(regionSupportCounts[r] > maxRegionSupport) maxRegionSupport = regionSupportCounts[r]; });
+    var majorityRegions = Object.keys(regionSupportCounts).filter(function(r){ return regionSupportCounts[r] === maxRegionSupport && maxRegionSupport > 0; });
+    var majorityRegion = majorityRegions.length ? majorityRegions[0] : null;
+
+    var tournamentAllowedCountries = {};
+    tourneys.forEach(function(t){
+      (t.allowedCountries || []).forEach(function(c){ tournamentAllowedCountries[c] = true; });
+    });
+
+    // If the roster can represent one or more countries, but none of those countries appear
+    // in any configured tournament, return one generic failure instead of a tournament-by-tournament dump.
+    if(maxAllCount >= 2 && topCountriesAll.length > 0 && !topCountriesAll.some(function(c){ return !!tournamentAllowedCountries[c]; })){
+      var genericMessage = "Rosters representing " + topCountriesAll.join(', ') + " do not have a tournament. Please check with staff on official eligibility.";
+      tourneys.forEach(function(t){
+        results.push({
+          tournament: t,
+          ok: false,
+          issues: [{ severity: "bad", message: genericMessage }],
+          details: { counts: {}, eligibleTeamCountries: [], representations: [], minPlayers: (t.minPlayers != null ? t.minPlayers : (t.region ? Config.getTeamMinPlayersForRegion(t.region) : 2)), representableCountries: topCountriesAll, majorityRegion: majorityRegion, majorityRegions: majorityRegions }
+        });
+      });
+      return results;
+    }
 
     tourneys.forEach(function(t){
       var issues = [];
       var counts = {};
       var minPlayers = (t.minPlayers != null ? t.minPlayers : (t.region ? Config.getTeamMinPlayersForRegion(t.region) : 2));
       var allowed = t.allowedCountries || [];
+
+      playerDisallowedIssues.forEach(function(issue){
+        issues.push({ severity: "bad", message: issue.message });
+      });
 
       // Region rule: limit players with no in-region representable option (imports)
       if(t.region){
@@ -295,7 +375,7 @@
       });
 
       var ok = issues.filter(function(i){ return i.severity === "bad"; }).length === 0;
-      results.push({ tournament: t, ok: ok, issues: issues, details: { counts: counts, eligibleTeamCountries: eligibleTeamCountries, representations: representations, minPlayers: minPlayers } });
+      results.push({ tournament: t, ok: ok, issues: issues, details: { counts: counts, eligibleTeamCountries: eligibleTeamCountries, representableCountries: topCountriesAll, regionRepresentableCountries: topCountriesAllRegion, representations: representations, minPlayers: minPlayers, majorityRegion: majorityRegion, majorityRegions: majorityRegions } });
     });
 
     return results;

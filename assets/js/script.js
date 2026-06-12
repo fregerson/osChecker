@@ -128,7 +128,52 @@
     } else {
       var eligible = tourneyResults.filter(function(e){ return !!e.ok; });
       if(eligible.length === 0){
-        var none = document.createElement('div'); none.className = 'alert alert-warn'; none.textContent = 'No eligible tournaments for this roster. Please check with staff.'; rosterResult.appendChild(none);
+        var firstBadIssue = null;
+        var representableCountries = [];
+        var majorityRegion = null;
+        tourneyResults.some(function(entry){
+          if(!majorityRegion && entry && entry.details && entry.details.majorityRegion){
+            majorityRegion = entry.details.majorityRegion;
+          }
+          return false;
+        });
+
+        var orderedResults = tourneyResults.slice();
+        if(majorityRegion){
+          orderedResults.sort(function(a, b){
+            var ar = a && a.tournament ? a.tournament.region : null;
+            var br = b && b.tournament ? b.tournament.region : null;
+            var aScore = (ar === majorityRegion) ? 0 : 1;
+            var bScore = (br === majorityRegion) ? 0 : 1;
+            return aScore - bScore;
+          });
+        }
+
+        orderedResults.some(function(entry){
+          var entryCountries = (entry.details && (entry.details.representableCountries || entry.details.regionRepresentableCountries || entry.details.eligibleTeamCountries)) || [];
+          entryCountries.forEach(function(code){
+            if(representableCountries.indexOf(code) === -1) representableCountries.push(code);
+          });
+          return (entry.issues || []).some(function(issue){
+            if(issue && issue.severity === 'bad' && issue.message){
+              firstBadIssue = issue.message;
+              return true;
+            }
+            return false;
+          });
+        });
+        var none = document.createElement('div');
+        none.className = 'alert alert-bad';
+        none.textContent = firstBadIssue || 'No eligible tournaments for this roster. Please check with staff.';
+        rosterResult.appendChild(none);
+
+        if(representableCountries.length){
+          var rep = document.createElement('div');
+          rep.className = 'small';
+          rep.style.margin = '6px 0 12px';
+          rep.textContent = 'Roster can represent: ' + representableCountries.map(codeToName).join(', ');
+          rosterResult.appendChild(rep);
+        }
         return;
       }
       eligible.forEach(function(entry){
